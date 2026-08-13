@@ -1,0 +1,37 @@
+# Environment: DEV
+global:
+  environment: dev
+
+services:
+  backend:
+    replicaCount: 1
+    image:
+      repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev"
+    configMap:
+      AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
+      AWS_SQS_QUEUE_URL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"
+
+  frontend:
+    replicaCount: 1
+    image:
+      repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
+
+  transcode-worker:
+    image:
+      repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev"
+    configMap:
+      AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
+      AWS_SQS_QUEUE_URL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"
+      AWS_SQS_QUEUE_NAME: "streamforge-transcode-queue-dev"
+
+keda:
+  maxReplicas: 2
+  triggers:
+    sqs:
+      queueURL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"

@@ -1,0 +1,87 @@
+{{- range $name, $svc := .Values.services }}
+{{- if eq $svc.kind "Rollout" }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Release.Name }}-{{ $name }}
+spec:
+  replicas: {{ $svc.replicaCount | default 1 }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ $.Release.Name }}-{{ $name }}
+  strategy:
+    blueGreen:
+      activeService: {{ $.Release.Name }}-{{ $name }}-svc
+      previewService: {{ $.Release.Name }}-{{ $name }}-preview-svc
+      autoPromotionEnabled: {{ if hasKey $svc.blueGreen "autoPromotionEnabled" }}{{ $svc.blueGreen.autoPromotionEnabled }}{{ else }}false{{ end }}
+      scaleDownDelaySeconds: {{ $svc.blueGreen.scaleDownDelaySeconds | default 30 }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Release.Name }}-{{ $name }}
+    spec:
+      {{- if and $svc.serviceAccount $svc.serviceAccount.name }}
+      serviceAccountName: {{ $svc.serviceAccount.name }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag | default "latest" }}"
+          imagePullPolicy: {{ $svc.image.pullPolicy | default "Always" }}
+          {{- if $svc.port }}
+          ports:
+            - containerPort: {{ $svc.port }}
+          {{- end }}
+          {{- if or $svc.configMap $svc.secrets }}
+          envFrom:
+            {{- if $svc.configMap }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-{{ $name }}-config
+            {{- end }}
+            {{- if $svc.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}-{{ $name }}-secret
+            {{- end }}
+          {{- end }}
+          {{- if $svc.resources }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          {{- end }}
+          {{- if and $svc.probes $svc.probes.readiness }}
+          readinessProbe:
+            httpGet:
+              path: {{ $svc.probes.readiness.path }}
+              port: {{ $svc.probes.readiness.port | default $svc.port }}
+            initialDelaySeconds: {{ $svc.probes.readiness.initialDelay | default 10 }}
+            periodSeconds: 10
+          {{- end }}
+          {{- if and $svc.probes $svc.probes.liveness }}
+          livenessProbe:
+            httpGet:
+              path: {{ $svc.probes.liveness.path }}
+              port: {{ $svc.probes.liveness.port | default $svc.port }}
+            initialDelaySeconds: {{ $svc.probes.liveness.initialDelay | default 15 }}
+            periodSeconds: 15
+          {{- end }}
+          {{- if $svc.volumes }}
+          volumeMounts:
+            {{- range $svc.volumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+          {{- end }}
+      {{- if $svc.volumes }}
+      volumes:
+        {{- range $svc.volumes }}
+        - name: {{ .name }}
+          {{- if eq .type "emptyDir" }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}

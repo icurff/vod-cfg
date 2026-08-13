@@ -1,0 +1,15 @@
+# StreamForge Terraform Variables Example
+# See environments/dev.tfvars, environments/staging.tfvars, environments/prod.tfvars
+
+environment         = "dev"
+location            = "southeastasia"
+aks_system_vm_size  = "Standard_B2s"
+aks_system_count    = 1
+aks_spot_vm_size    = "Standard_B4ms"
+aks_spot_max_count  = 2
+storage_replication = "LRS"
+acr_sku             = "Basic"
+frontdoor_sku       = "Standard_AzureFrontDoor"
+frontend_domain     = "icurff.site"
+api_domain          = "api.icurff.site"
+media_domain        = "media.icurff.site"

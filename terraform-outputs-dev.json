@@ -1,0 +1,36 @@
+{
+  "backend_irsa_role_arn": "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev",
+  "cloudfront_frontend_domain": "doac3bmze0rda.cloudfront.net",
+  "cloudfront_media_domain": "d3se0puvw91p1a.cloudfront.net",
+  "dynamodb_videos_table": "streamforge-videos-dev",
+  "ecr_backend_url": "393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend",
+  "ecr_frontend_url": "393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend",
+  "ecr_registry_url": "393698973321.dkr.ecr.ap-southeast-1.amazonaws.com",
+  "ecr_worker_url": "393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker",
+  "eks_cluster_name": "eks-streamforge",
+  "s3_bucket_arn": "arn:aws:s3:::streamforge-media-dev-393698973321",
+  "s3_bucket_name": "streamforge-media-dev-393698973321",
+  "sqs_queue_arn": "arn:aws:sqs:ap-southeast-1:393698973321:streamforge-transcode-queue-dev",
+  "worker_irsa_role_arn": "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev",
+  "acm_certificate_arn": "arn:aws:acm:us-east-1:393698973321:certificate/bca5a34b-8685-434d-9fc3-56605b2ed248",
+  "acm_validation_records": [
+    {
+      "domain_name": "icurff.site",
+      "record_name": "_bc9a615316d235aba657d9013495e3ec.icurff.site.",
+      "record_type": "CNAME",
+      "record_value": "_32939f6a562224415f8630279ab07d65.jkddzztszm.acm-validations.aws."
+    },
+    {
+      "domain_name": "media.icurff.site",
+      "record_name": "_c8adb83909d0dfd67bbe47791949865a.media.icurff.site.",
+      "record_type": "CNAME",
+      "record_value": "_bbe1714e805d1ff82bccdd3f46b32966.jkddzztszm.acm-validations.aws."
+    },
+    {
+      "domain_name": "api.icurff.site",
+      "record_name": "_5e01e76d3c9c3344bb87e34dafc9ba6c.api.icurff.site.",
+      "record_type": "CNAME",
+      "record_value": "_5945aad2e696002d1e1ee5dbb0d7b41a.jkddzztszm.acm-validations.aws."
+    }
+  ]
+}

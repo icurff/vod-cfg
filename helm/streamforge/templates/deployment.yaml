@@ -1,0 +1,73 @@
+{{- range $name, $svc := .Values.services }}
+{{- if eq $svc.kind "Deployment" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Release.Name }}-{{ $name }}
+spec:
+  replicas: {{ $svc.replicaCount | default 0 }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ $.Release.Name }}-{{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Release.Name }}-{{ $name }}
+    spec:
+      {{- if and $svc.serviceAccount $svc.serviceAccount.name }}
+      serviceAccountName: {{ $svc.serviceAccount.name }}
+      {{- end }}
+      {{- if $svc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml $svc.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if $svc.tolerations }}
+      tolerations:
+        {{- toYaml $svc.tolerations | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag | default "latest" }}"
+          imagePullPolicy: {{ $svc.image.pullPolicy | default "Always" }}
+          {{- if $svc.port }}
+          ports:
+            - containerPort: {{ $svc.port }}
+          {{- end }}
+          {{- if or $svc.configMap $svc.secrets }}
+          envFrom:
+            {{- if $svc.configMap }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-{{ $name }}-config
+            {{- end }}
+            {{- if $svc.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}-{{ $name }}-secret
+            {{- end }}
+          {{- end }}
+          {{- if $svc.resources }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          {{- end }}
+          {{- if $svc.volumes }}
+          volumeMounts:
+            {{- range $svc.volumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+          {{- end }}
+      {{- if $svc.volumes }}
+      volumes:
+        {{- range $svc.volumes }}
+        - name: {{ .name }}
+          {{- if eq .type "emptyDir" }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}

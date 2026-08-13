@@ -1,0 +1,188 @@
+# Unified Helm Values for StreamForge Cloud-Native Infrastructure (AWS Mode)
+# Services Map: backend (Rollout), frontend (Rollout), transcode-worker (Deployment + KEDA)
+# ECR Registry: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com
+
+global:
+  domain: icurff.site
+  environment: dev
+  awsRegion: ap-southeast-1
+  awsAccountId: "393698973321"
+
+services:
+  # -----------------------------------------------------------------------------
+  # BACKEND API (vod-be) - Argo Rollout Blue-Green
+  # -----------------------------------------------------------------------------
+  backend:
+    kind: Rollout
+    replicaCount: 1
+
+    image:
+      repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend
+      pullPolicy: Always
+      tag: "latest" # backend-tag
+
+    port: 8080
+
+    serviceAccount:
+      create: true
+      name: vod-be-sa
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev"
+
+    blueGreen:
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+
+    configMap:
+      SERVER_PORT: "8080"
+      SPRING_APPLICATION_NAME: "streamforge"
+      SPRING_DATA_MONGODB_DATABASE: "voddb"
+      AWS_REGION: "ap-southeast-1"
+      AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
+      AWS_S3_MEDIA_PUBLIC_URL: "https://media.icurff.site"
+      AWS_S3_UPLOAD_PREFIX: "uploads/"
+      AWS_S3_HLS_PREFIX: "hls/"
+      ICURFF_APP_STORAGE: "/app/storage"
+
+    secrets:
+      DOCUMENTDB_URI: "" # Set from: terraform output documentdb_connection_string
+
+    ingress:
+      enabled: true
+      className: "nginx"
+      host: api.icurff.site
+      path: /
+      pathType: Prefix
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+
+    probes:
+      readiness:
+        path: /actuator/health
+        port: 8080
+        initialDelay: 30
+      liveness:
+        path: /actuator/health
+        port: 8080
+        initialDelay: 45
+
+    volumes:
+      - name: temp-storage
+        mountPath: /app/storage
+        type: emptyDir
+
+  # -----------------------------------------------------------------------------
+  # FRONTEND (vod-fe) - Argo Rollout Blue-Green
+  # -----------------------------------------------------------------------------
+  frontend:
+    kind: Rollout
+    replicaCount: 1
+
+    image:
+      repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
+      pullPolicy: Always
+      tag: "latest" # frontend-tag
+
+    port: 80
+
+    blueGreen:
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 30
+
+    ingress:
+      enabled: true
+      className: "nginx"
+      host: icurff.site
+      path: /
+      pathType: Prefix
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+    probes:
+      readiness:
+        path: /
+        port: 80
+        initialDelay: 10
+      liveness:
+        path: /
+        port: 80
+        initialDelay: 15
+
+  # -----------------------------------------------------------------------------
+  # TRANSCODE WORKER - KEDA Scale-To-Zero on EKS Spot Nodes
+  # -----------------------------------------------------------------------------
+  transcode-worker:
+    kind: Deployment
+    replicaCount: 0 # Managed by KEDA autoscaler
+
+    image:
+      repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
+      pullPolicy: Always
+      tag: "latest" # worker-tag
+
+    serviceAccount:
+      create: true
+      name: transcode-worker-sa
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev"
+
+    # Schedule on EKS Spot nodes (labeled by EKS managed node group)
+    nodeSelector:
+      eks.amazonaws.com/capacityType: SPOT
+
+    # No tolerations needed — EKS Spot nodes are not tainted by default
+    tolerations: []
+
+    configMap:
+      AWS_REGION: "ap-southeast-1"
+      AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
+      AWS_S3_UPLOAD_PREFIX: "uploads/"
+      AWS_S3_HLS_PREFIX: "hls/"
+      AWS_SQS_QUEUE_URL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"
+      AWS_SQS_QUEUE_NAME: "streamforge-transcode-queue-dev"
+      AWS_MEDIA_CDN_URL: "https://media.icurff.site"
+      WORKER_SCRATCH_DIR: "/tmp/streamforge-worker"
+
+    secrets:
+      DOCUMENTDB_URI: "" # Set from: terraform output documentdb_connection_string
+
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 1536Mi
+      limits:
+        cpu: 2000m
+        memory: 3072Mi
+
+    volumes:
+      - name: scratch-storage
+        mountPath: /tmp/streamforge-worker
+        type: emptyDir
+
+# -----------------------------------------------------------------------------
+# KEDA AUTOSCALER CONFIGURATION (aws-sqs-queue trigger)
+# -----------------------------------------------------------------------------
+keda:
+  enabled: true
+  targetService: transcode-worker
+  minReplicas: 0
+  maxReplicas: 5
+  cooldownPeriod: 300
+  pollingInterval: 15
+  triggers:
+    sqs:
+      queueURL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"
+      queueLength: "1"
+      awsRegion: "ap-southeast-1"

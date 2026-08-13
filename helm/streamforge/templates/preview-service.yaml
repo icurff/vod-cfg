@@ -1,0 +1,22 @@
+{{- range $name, $svc := .Values.services }}
+{{- if eq $svc.kind "Rollout" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}-preview-svc
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Release.Name }}-{{ $name }}
+    role: preview
+spec:
+  type: {{ $svc.serviceType | default "ClusterIP" }}
+  ports:
+    - port: {{ $svc.port }}
+      targetPort: {{ $svc.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ $.Release.Name }}-{{ $name }}
+{{- end }}
+{{- end }}

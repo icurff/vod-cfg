@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: streamforge
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: StreamForge Video Sharing Platform Project
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: streamforge-dev
+      server: https://kubernetes.default.svc
+    - namespace: streamforge-staging
+      server: https://kubernetes.default.svc
+    - namespace: streamforge-production
+      server: https://kubernetes.default.svc
+    - namespace: streamforge
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
