@@ -8,9 +8,9 @@ metadata:
 spec:
   project: streamforge
   source:
-    repoURL: https://github.com/icurff/de-main.git
+    repoURL: https://github.com/icurff/vod-cfg.git
     targetRevision: develop
-    path: vod-cfg/helm/streamforge
+    path: helm/streamforge
     helm:
       valueFiles:
         - values.yaml

@@ -1,0 +1,70 @@
+name: CD - GitOps Image Tag Updater
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service name (backend, frontend, transcode-worker)'
+        required: true
+        type: choice
+        options:
+          - backend
+          - frontend
+          - transcode-worker
+      tag:
+        description: 'Image tag / Git commit SHA'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - dev
+          - staging
+          - prod
+
+permissions:
+  contents: write
+
+jobs:
+  update-gitops:
+    name: Update Helm Values with New Image Tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Update Helm Values
+        run: |
+          SERVICE="${{ github.event.inputs.service }}"
+          TAG="${{ github.event.inputs.tag }}"
+          ENV="${{ github.event.inputs.environment }}"
+          
+          echo "Updating service '$SERVICE' with image tag '$TAG' for env '$ENV'..."
+          
+          if [ "$ENV" = "all" ] || [ "$ENV" = "dev" ]; then
+            yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values.yaml
+          fi
+          
+          if [ "$ENV" = "dev" ]; then
+            yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values-dev.yaml
+          elif [ "$ENV" = "staging" ]; then
+            yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values-staging.yaml
+          elif [ "$ENV" = "prod" ]; then
+            yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values-prod.yaml
+          fi
+
+      - name: Commit & Push Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm/streamforge/
+          git commit -m "chore(cd): promote ${{ github.event.inputs.service }} to ${{ github.event.inputs.tag }} on ${{ github.event.inputs.environment }} [skip ci]" || echo "No changes to commit"
+          git push

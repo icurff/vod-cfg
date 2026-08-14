@@ -96,5 +96,5 @@ variable "enable_custom_domain" {
 variable "github_repo" {
   type        = string
   description = "GitHub repo in format 'owner/repo'"
-  default     = "icurff/de-main"
+  default     = "icurff/streamforge"
 }
