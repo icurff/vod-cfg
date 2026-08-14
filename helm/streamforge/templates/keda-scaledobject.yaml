@@ -1,4 +1,16 @@
 {{- if .Values.keda.enabled }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.keda.targetService }}-auth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-{{ .Values.keda.targetService }}
+spec:
+  podIdentity:
+    provider: aws-k8s
+---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -21,6 +33,7 @@ spec:
         queueURL: {{ .Values.keda.triggers.sqs.queueURL | quote }}
         queueLength: {{ .Values.keda.triggers.sqs.queueLength | default "1" | quote }}
         awsRegion: {{ .Values.keda.triggers.sqs.awsRegion | default "ap-southeast-1" | quote }}
-        # identityOwner: pod — KEDA uses the worker pod's IRSA role (no separate AWS credentials needed)
         identityOwner: pod
+      authenticationRef:
+        name: {{ .Release.Name }}-{{ .Values.keda.targetService }}-auth
 {{- end }}
