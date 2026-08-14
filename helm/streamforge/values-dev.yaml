@@ -20,6 +20,7 @@ services:
   transcode-worker:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
+      tag: 1d65d1ce1dfcf5a787583c499682cb782cbcae61
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev"
