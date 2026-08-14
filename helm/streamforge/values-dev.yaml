@@ -1,7 +1,6 @@
 # Environment: DEV
 global:
   environment: dev
-
 services:
   backend:
     replicaCount: 1
@@ -13,12 +12,11 @@ services:
     configMap:
       AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
       AWS_SQS_QUEUE_URL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"
-
   frontend:
     replicaCount: 1
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
-
+      tag: 1d65d1ce1dfcf5a787583c499682cb782cbcae61
   transcode-worker:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
@@ -29,7 +27,6 @@ services:
       AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
       AWS_SQS_QUEUE_URL: "https://sqs.ap-southeast-1.amazonaws.com/393698973321/streamforge-transcode-queue-dev"
       AWS_SQS_QUEUE_NAME: "streamforge-transcode-queue-dev"
-
 keda:
   maxReplicas: 2
   triggers:

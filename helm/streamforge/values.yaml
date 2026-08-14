@@ -7,7 +7,6 @@ global:
   environment: dev
   awsRegion: ap-southeast-1
   awsAccountId: "393698973321"
-
 services:
   # -----------------------------------------------------------------------------
   # BACKEND API (vod-be) - Argo Rollout Blue-Green
@@ -15,24 +14,19 @@ services:
   backend:
     kind: Rollout
     replicaCount: 1
-
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend
       pullPolicy: Always
       tag: "latest" # backend-tag
-
     port: 8080
-
     serviceAccount:
       create: true
       name: vod-be-sa
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev"
-
     blueGreen:
       autoPromotionEnabled: false
       scaleDownDelaySeconds: 30
-
     configMap:
       SERVER_PORT: "8080"
       SPRING_APPLICATION_NAME: "streamforge"
@@ -43,17 +37,14 @@ services:
       AWS_S3_UPLOAD_PREFIX: "uploads/"
       AWS_S3_HLS_PREFIX: "hls/"
       ICURFF_APP_STORAGE: "/app/storage"
-
     secrets:
       DOCUMENTDB_URI: "" # Set from: terraform output documentdb_connection_string
-
     ingress:
       enabled: true
       className: "nginx"
       host: api.icurff.site
       path: /
       pathType: Prefix
-
     resources:
       requests:
         cpu: 250m
@@ -61,7 +52,6 @@ services:
       limits:
         cpu: 1000m
         memory: 1024Mi
-
     probes:
       readiness:
         path: /actuator/health
@@ -71,37 +61,30 @@ services:
         path: /actuator/health
         port: 8080
         initialDelay: 45
-
     volumes:
       - name: temp-storage
         mountPath: /app/storage
         type: emptyDir
-
   # -----------------------------------------------------------------------------
   # FRONTEND (vod-fe) - Argo Rollout Blue-Green
   # -----------------------------------------------------------------------------
   frontend:
     kind: Rollout
     replicaCount: 1
-
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
       pullPolicy: Always
-      tag: "latest" # frontend-tag
-
+      tag: "1d65d1ce1dfcf5a787583c499682cb782cbcae61" # frontend-tag
     port: 80
-
     blueGreen:
       autoPromotionEnabled: true
       scaleDownDelaySeconds: 30
-
     ingress:
       enabled: true
       className: "nginx"
       host: icurff.site
       path: /
       pathType: Prefix
-
     resources:
       requests:
         cpu: 100m
@@ -109,7 +92,6 @@ services:
       limits:
         cpu: 500m
         memory: 256Mi
-
     probes:
       readiness:
         path: /
@@ -119,32 +101,26 @@ services:
         path: /
         port: 80
         initialDelay: 15
-
   # -----------------------------------------------------------------------------
   # TRANSCODE WORKER - KEDA Scale-To-Zero on EKS Spot Nodes
   # -----------------------------------------------------------------------------
   transcode-worker:
     kind: Deployment
     replicaCount: 0 # Managed by KEDA autoscaler
-
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
       pullPolicy: Always
       tag: "latest" # worker-tag
-
     serviceAccount:
       create: true
       name: transcode-worker-sa
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev"
-
     # Schedule on EKS Spot nodes (labeled by EKS managed node group)
     nodeSelector:
       eks.amazonaws.com/capacityType: SPOT
-
     # No tolerations needed — EKS Spot nodes are not tainted by default
     tolerations: []
-
     configMap:
       AWS_REGION: "ap-southeast-1"
       AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
@@ -154,10 +130,8 @@ services:
       AWS_SQS_QUEUE_NAME: "streamforge-transcode-queue-dev"
       AWS_MEDIA_CDN_URL: "https://media.icurff.site"
       WORKER_SCRATCH_DIR: "/tmp/streamforge-worker"
-
     secrets:
       DOCUMENTDB_URI: "" # Set from: terraform output documentdb_connection_string
-
     resources:
       requests:
         cpu: 1000m
@@ -165,12 +139,10 @@ services:
       limits:
         cpu: 2000m
         memory: 3072Mi
-
     volumes:
       - name: scratch-storage
         mountPath: /tmp/streamforge-worker
         type: emptyDir
-
 # -----------------------------------------------------------------------------
 # KEDA AUTOSCALER CONFIGURATION (aws-sqs-queue trigger)
 # -----------------------------------------------------------------------------
