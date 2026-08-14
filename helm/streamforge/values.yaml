@@ -116,10 +116,9 @@ services:
       name: transcode-worker-sa
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev"
-    # Schedule on EKS Spot nodes (labeled by EKS managed node group)
+    # Schedule on EKS Spot nodes
     nodeSelector:
-      eks.amazonaws.com/capacityType: SPOT
-    # No tolerations needed — EKS Spot nodes are not tainted by default
+      role: spot
     tolerations: []
     configMap:
       AWS_REGION: "ap-southeast-1"
@@ -134,11 +133,11 @@ services:
       DOCUMENTDB_URI: "" # Set from: terraform output documentdb_connection_string
     resources:
       requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
         cpu: 1000m
         memory: 1536Mi
-      limits:
-        cpu: 2000m
-        memory: 3072Mi
     volumes:
       - name: scratch-storage
         mountPath: /tmp/streamforge-worker

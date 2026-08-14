@@ -28,16 +28,23 @@ resource "aws_s3_bucket_public_access_block" "media" {
   restrict_public_buckets = true
 }
 
-# CORS: allow CloudFront edge locations to serve HLS to browsers
+# CORS: allow direct presigned uploads and CloudFront HLS playback
 resource "aws_s3_bucket_cors_configuration" "media" {
   bucket = aws_s3_bucket.media.id
 
   cors_rule {
     allowed_headers = ["*"]
-    allowed_methods = ["GET", "HEAD"]
-    allowed_origins = ["https://icurff.site", "https://*.icurff.site"]
-    expose_headers  = ["ETag", "Content-Length"]
-    max_age_seconds = 3000
+    allowed_methods = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    allowed_origins = [
+      "https://icurff.site",
+      "https://*.icurff.site",
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:8080",
+      "http://127.0.0.1:*"
+    ]
+    expose_headers  = ["ETag", "Content-Length", "x-amz-server-side-encryption", "x-amz-request-id", "x-amz-id-2"]
+    max_age_seconds = 3600
   }
 }
 
