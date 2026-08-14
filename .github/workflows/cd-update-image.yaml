@@ -25,6 +25,8 @@ on:
           - dev
           - staging
           - prod
+  repository_dispatch:
+    types: [update-image]
 
 permissions:
   contents: write
@@ -43,21 +45,21 @@ jobs:
 
       - name: Update Helm Values
         run: |
-          SERVICE="${{ github.event.inputs.service }}"
-          TAG="${{ github.event.inputs.tag }}"
-          ENV="${{ github.event.inputs.environment }}"
+          SERVICE="${{ github.event.client_payload.service || github.event.inputs.service }}"
+          TAG="${{ github.event.client_payload.tag || github.event.inputs.tag }}"
+          ENV="${{ github.event.client_payload.environment || github.event.inputs.environment || 'dev' }}"
           
           echo "Updating service '$SERVICE' with image tag '$TAG' for env '$ENV'..."
           
-          if [ "$ENV" = "all" ] || [ "$ENV" = "dev" ]; then
+          if [ "$ENV" = "all" ] || [ "$ENV" = "dev" ] || [ "$ENV" = "develop" ]; then
             yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values.yaml
           fi
           
-          if [ "$ENV" = "dev" ]; then
+          if [ "$ENV" = "dev" ] || [ "$ENV" = "develop" ]; then
             yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values-dev.yaml
           elif [ "$ENV" = "staging" ]; then
             yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values-staging.yaml
-          elif [ "$ENV" = "prod" ]; then
+          elif [ "$ENV" = "prod" ] || [ "$ENV" = "main" ]; then
             yq eval ".services.\"${SERVICE}\".image.tag = \"${TAG}\"" -i helm/streamforge/values-prod.yaml
           fi
 
