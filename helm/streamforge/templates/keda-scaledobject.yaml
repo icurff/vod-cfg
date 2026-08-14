@@ -9,7 +9,7 @@ metadata:
     app: {{ .Release.Name }}-{{ .Values.keda.targetService }}
 spec:
   podIdentity:
-    provider: aws-k8s
+    provider: aws-eks
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
