@@ -17,7 +17,7 @@ services:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend
       pullPolicy: Always
-      tag: "latest" # backend-tag
+      tag: "1d65d1ce1dfcf5a787583c499682cb782cbcae61" # backend-tag
     port: 8080
     serviceAccount:
       create: true
