@@ -70,19 +70,33 @@ resource "aws_iam_role" "worker" {
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Federated = var.oidc_provider_arn
-      }
-      Action = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "${local.oidc_provider_id}:sub" = "system:serviceaccount:streamforge-${var.environment}:transcode-worker-sa"
-          "${local.oidc_provider_id}:aud" = "sts.amazonaws.com"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = var.oidc_provider_arn
         }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${local.oidc_provider_id}:aud" = "sts.amazonaws.com"
+          }
+          StringLike = {
+            "${local.oidc_provider_id}:sub" = [
+              "system:serviceaccount:streamforge-${var.environment}:transcode-worker-sa",
+              "system:serviceaccount:keda:keda-operator"
+            ]
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${var.aws_account_id}:role/streamforge-worker-irsa-${var.environment}"
+        }
+        Action = "sts:AssumeRole"
       }
-    }]
+    ]
   })
   tags = var.tags
 }
@@ -129,6 +143,11 @@ resource "aws_iam_role_policy" "worker_permissions" {
           "arn:aws:dynamodb:*:${var.aws_account_id}:table/streamforge-*-${var.environment}",
           "arn:aws:dynamodb:*:${var.aws_account_id}:table/streamforge-*-${var.environment}/index/*"
         ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["sts:AssumeRole"]
+        Resource = "arn:aws:iam::${var.aws_account_id}:role/streamforge-worker-irsa-${var.environment}"
       }
     ]
   })
