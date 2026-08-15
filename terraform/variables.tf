@@ -92,6 +92,12 @@ variable "enable_custom_domain" {
   default     = false
 }
 
+variable "alb_dns_name" {
+  type        = string
+  description = "ALB DNS name from NGINX Ingress controller"
+  default     = ""
+}
+
 # ── GitHub ──
 variable "github_repo" {
   type        = string

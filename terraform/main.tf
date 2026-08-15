@@ -133,6 +133,7 @@ module "cloudfront" {
   api_domain                = var.api_domain
   media_domain              = var.media_domain
   enable_custom_domain      = var.enable_custom_domain
+  alb_dns_name              = var.alb_dns_name
   environment               = var.environment
   tags                      = local.tags
 }

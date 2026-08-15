@@ -221,9 +221,9 @@ resource "aws_eks_node_group" "spot" {
   ami_type        = "AL2023_x86_64_STANDARD"
 
   scaling_config {
-    desired_size = 0
-    min_size     = 0
-    max_size     = var.spot_max_count
+    desired_size = 1
+    min_size     = 1
+    max_size     = var.spot_max_count >= 1 ? var.spot_max_count : 1
   }
 
   update_config { max_unavailable = 1 }
