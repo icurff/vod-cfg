@@ -110,7 +110,7 @@ services:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
       pullPolicy: Always
-      tag: "1d65d1ce1dfcf5a787583c499682cb782cbcae61" # worker-tag
+      tag: "0ee2dad117d48a499e31540d65031e42824742a3" # worker-tag
     serviceAccount:
       create: true
       name: transcode-worker-sa
