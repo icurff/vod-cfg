@@ -232,6 +232,12 @@ resource "aws_eks_node_group" "spot" {
     role = "spot"
   }
 
+  taint {
+    key    = "role"
+    value  = "spot"
+    effect = "NO_SCHEDULE"
+  }
+
   tags = merge(var.tags, { Name = "eks-spot-nodes-streamforge-${var.environment}" })
 
   depends_on = [

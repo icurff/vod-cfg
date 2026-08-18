@@ -45,6 +45,8 @@ services:
       host: api.icurff.site
       path: /
       pathType: Prefix
+    nodeSelector:
+      role: system
     resources:
       requests:
         cpu: 250m
@@ -85,6 +87,8 @@ services:
       host: icurff.site
       path: /
       pathType: Prefix
+    nodeSelector:
+      role: system
     resources:
       requests:
         cpu: 100m
@@ -119,7 +123,11 @@ services:
     # Schedule on EKS Spot nodes
     nodeSelector:
       role: spot
-    tolerations: []
+    tolerations:
+      - key: "role"
+        operator: "Equal"
+        value: "spot"
+        effect: "NoSchedule"
     configMap:
       AWS_REGION: "ap-southeast-1"
       AWS_S3_BUCKET_NAME: "streamforge-media-dev-393698973321"
