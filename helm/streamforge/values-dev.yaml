@@ -6,7 +6,7 @@ services:
     replicaCount: 1
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend
-      tag: 7f9cdd524e68e7e68f789b3f2e08525e35562d21
+      tag: c2b7a24d10a985c54bf8461416d98c709bd6ae46
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev"
