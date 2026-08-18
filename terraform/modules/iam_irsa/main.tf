@@ -152,3 +152,61 @@ resource "aws_iam_role_policy" "worker_permissions" {
     ]
   })
 }
+
+# ── Cluster Autoscaler IRSA Role ──
+resource "aws_iam_role" "cluster_autoscaler" {
+  name = "streamforge-cluster-autoscaler-irsa-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = var.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${local.oidc_provider_id}:sub" = "system:serviceaccount:kube-system:cluster-autoscaler"
+          "${local.oidc_provider_id}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy" "cluster_autoscaler_policy" {
+  name = "cluster-autoscaler-policy"
+  role = aws_iam_role.cluster_autoscaler.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeScalingActivities",
+          "autoscaling:DescribeTags",
+          "ec2:DescribeImages",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplateVersions",
+          "ec2:GetInstanceTypesFromInstanceRequirements",
+          "eks:DescribeNodegroup"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}

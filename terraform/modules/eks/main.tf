@@ -191,15 +191,19 @@ resource "aws_eks_node_group" "system" {
 
   scaling_config {
     desired_size = var.system_node_count
-    min_size     = 1
-    max_size     = max(var.system_node_count, 2)
+    min_size     = 2
+    max_size     = max(var.system_node_count, 5)
   }
 
   update_config { max_unavailable = 1 }
 
   labels = { role = "system" }
 
-  tags = merge(var.tags, { Name = "eks-system-nodes-streamforge-${var.environment}" })
+  tags = merge(var.tags, {
+    Name                                            = "eks-system-nodes-streamforge-${var.environment}"
+    "k8s.io/cluster-autoscaler/enabled"            = "true"
+    "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
+  })
 
   depends_on = [
     aws_iam_role_policy_attachment.nodes_worker,
@@ -221,9 +225,9 @@ resource "aws_eks_node_group" "spot" {
   ami_type        = "AL2023_x86_64_STANDARD"
 
   scaling_config {
-    desired_size = 1
-    min_size     = 1
-    max_size     = var.spot_max_count >= 1 ? var.spot_max_count : 1
+    desired_size = 0
+    min_size     = 0
+    max_size     = var.spot_max_count >= 1 ? var.spot_max_count : 3
   }
 
   update_config { max_unavailable = 1 }
@@ -238,7 +242,11 @@ resource "aws_eks_node_group" "spot" {
     effect = "NO_SCHEDULE"
   }
 
-  tags = merge(var.tags, { Name = "eks-spot-nodes-streamforge-${var.environment}" })
+  tags = merge(var.tags, {
+    Name                                            = "eks-spot-nodes-streamforge-${var.environment}"
+    "k8s.io/cluster-autoscaler/enabled"            = "true"
+    "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
+  })
 
   depends_on = [
     aws_iam_role_policy_attachment.nodes_worker,

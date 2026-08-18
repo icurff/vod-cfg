@@ -25,7 +25,7 @@ services:
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev"
     blueGreen:
-      autoPromotionEnabled: false
+      autoPromotionEnabled: true
       scaleDownDelaySeconds: 30
     configMap:
       SERVER_PORT: "8080"
