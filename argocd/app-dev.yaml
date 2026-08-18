@@ -9,7 +9,7 @@ spec:
   project: streamforge
   source:
     repoURL: https://github.com/icurff/vod-cfg.git
-    targetRevision: develop
+    targetRevision: main
     path: helm/streamforge
     helm:
       valueFiles:

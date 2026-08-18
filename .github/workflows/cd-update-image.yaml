@@ -81,14 +81,9 @@ jobs:
         run: |
           SERVICE="${{ github.event.client_payload.service || github.event.inputs.service }}"
           TAG="${{ github.event.client_payload.tag || github.event.inputs.tag }}"
-          ENV="${{ github.event.client_payload.environment || github.event.inputs.environment || 'develop' }}"
+          ENV="${{ github.event.client_payload.environment || github.event.inputs.environment || 'all' }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add helm/streamforge/
           git commit -m "chore(cd): promote $SERVICE to $TAG on $ENV [skip ci]" || echo "No changes to commit"
-          
-          TARGET_BRANCH="$ENV"
-          if [ "$TARGET_BRANCH" = "dev" ]; then TARGET_BRANCH="develop"; fi
-          if [ "$TARGET_BRANCH" = "prod" ]; then TARGET_BRANCH="main"; fi
-          
-          git push origin HEAD:$TARGET_BRANCH || git push
+          git push origin HEAD:main || git push
