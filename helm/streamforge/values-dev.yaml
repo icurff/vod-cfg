@@ -17,7 +17,7 @@ services:
     replicaCount: 1
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
-      tag: c2b7a24d10a985c54bf8461416d98c709bd6ae46
+      tag: 0508948b9e0b104c041d80eac0e8719c6546cc93
   transcode-worker:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker

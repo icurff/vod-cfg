@@ -76,7 +76,7 @@ services:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
       pullPolicy: Always
-      tag: "c2b7a24d10a985c54bf8461416d98c709bd6ae46" # frontend-tag
+      tag: "0508948b9e0b104c041d80eac0e8719c6546cc93" # frontend-tag
     port: 80
     blueGreen:
       autoPromotionEnabled: true
