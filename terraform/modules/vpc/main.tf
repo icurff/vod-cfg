@@ -22,8 +22,8 @@ resource "aws_subnet" "public" {
   availability_zone       = local.azs[count.index]
   map_public_ip_on_launch = true
   tags = merge(var.tags, {
-    Name                     = "subnet-public-${count.index + 1}-streamforge-${var.environment}"
-    "kubernetes.io/role/elb" = "1"
+    Name                                    = "subnet-public-${count.index + 1}-streamforge-${var.environment}"
+    "kubernetes.io/role/elb"                = "1"
     "kubernetes.io/cluster/eks-streamforge" = "shared"
   })
 }
@@ -35,8 +35,8 @@ resource "aws_subnet" "private" {
   cidr_block        = "10.0.${count.index + 10}.0/24"
   availability_zone = local.azs[count.index]
   tags = merge(var.tags, {
-    Name                              = "subnet-private-${count.index + 1}-streamforge-${var.environment}"
-    "kubernetes.io/role/internal-elb" = "1"
+    Name                                    = "subnet-private-${count.index + 1}-streamforge-${var.environment}"
+    "kubernetes.io/role/internal-elb"       = "1"
     "kubernetes.io/cluster/eks-streamforge" = "shared"
   })
 }

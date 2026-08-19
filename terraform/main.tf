@@ -25,7 +25,7 @@ module "vpc" {
 }
 
 # 2. VPC Endpoints — keep all AWS API traffic inside the AWS backbone
-#    S3 (Gateway, free) + SQS/ECR/SecretsManager/CloudWatch/EKS (Interface)
+#    S3 (Gateway, free) + SQS/ECR/SecretsManager/EKS (Interface)
 module "vpc_endpoints" {
   source = "./modules/vpc_endpoints"
 
@@ -110,15 +110,7 @@ module "secrets_manager" {
   tags                  = local.tags
 }
 
-# 10. CloudWatch (log groups for EKS workloads)
-module "cloudwatch" {
-  source = "./modules/cloudwatch"
-
-  environment = var.environment
-  tags        = local.tags
-}
-
-# 11. CloudFront (media CDN via OAC + frontend distribution)
+# 10. CloudFront (media CDN via OAC + frontend distribution)
 module "cloudfront" {
   source = "./modules/cloudfront"
 
@@ -138,7 +130,7 @@ module "cloudfront" {
   tags                      = local.tags
 }
 
-# 12. IAM IRSA Roles (pod-level AWS permissions, no long-lived keys)
+# 11. IAM IRSA Roles (pod-level AWS permissions, no long-lived keys)
 module "iam_irsa" {
   source = "./modules/iam_irsa"
 

@@ -85,17 +85,6 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   tags                = merge(var.tags, { Name = "vpce-sm-streamforge-${var.environment}" })
 }
 
-# ── CloudWatch Logs Interface Endpoint ──
-resource "aws_vpc_endpoint" "cloudwatch_logs" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.aws_region}.logs"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.private_subnet_ids
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-  private_dns_enabled = true
-  tags                = merge(var.tags, { Name = "vpce-cwlogs-streamforge-${var.environment}" })
-}
-
 # ── EKS Interface Endpoint (private API server access from nodes) ──
 resource "aws_vpc_endpoint" "eks" {
   vpc_id              = var.vpc_id

@@ -1,7 +1,7 @@
-variable "vpc_id"               { type = string }
-variable "private_subnet_ids"   { type = list(string) }
-variable "public_subnet_ids"    { type = list(string) }
-variable "environment"          { type = string }
+variable "vpc_id" { type = string }
+variable "private_subnet_ids" { type = list(string) }
+variable "public_subnet_ids" { type = list(string) }
+variable "environment" { type = string }
 
 variable "cluster_name" {
   type        = string
@@ -15,7 +15,7 @@ variable "kubernetes_version" {
 }
 
 variable "system_instance_type" { type = string }
-variable "system_node_count"    { type = number }
-variable "spot_instance_types"  { type = list(string) }
-variable "spot_max_count"       { type = number }
-variable "tags"                 { type = map(string) }
+variable "system_node_count" { type = number }
+variable "spot_instance_types" { type = list(string) }
+variable "spot_max_count" { type = number }
+variable "tags" { type = map(string) }

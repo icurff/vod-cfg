@@ -117,7 +117,7 @@ resource "aws_eks_cluster" "main" {
   vpc_config {
     subnet_ids              = distinct(concat(var.private_subnet_ids, var.public_subnet_ids))
     endpoint_private_access = true
-    endpoint_public_access  = true  # keep for kubectl from developer machines
+    endpoint_public_access  = true # keep for kubectl from developer machines
     security_group_ids      = [aws_security_group.cluster.id]
   }
 
@@ -163,11 +163,6 @@ resource "aws_iam_role_policy_attachment" "nodes_ecr" {
   role       = aws_iam_role.nodes.name
 }
 
-resource "aws_iam_role_policy_attachment" "nodes_cloudwatch" {
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-  role       = aws_iam_role.nodes.name
-}
-
 resource "aws_iam_role_policy_attachment" "nodes_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.nodes.name
@@ -201,7 +196,7 @@ resource "aws_eks_node_group" "system" {
 
   tags = merge(var.tags, {
     Name                                            = "eks-system-nodes-streamforge-${var.environment}"
-    "k8s.io/cluster-autoscaler/enabled"            = "true"
+    "k8s.io/cluster-autoscaler/enabled"             = "true"
     "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
   })
 
@@ -244,7 +239,7 @@ resource "aws_eks_node_group" "spot" {
 
   tags = merge(var.tags, {
     Name                                            = "eks-spot-nodes-streamforge-${var.environment}"
-    "k8s.io/cluster-autoscaler/enabled"            = "true"
+    "k8s.io/cluster-autoscaler/enabled"             = "true"
     "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
   })
 

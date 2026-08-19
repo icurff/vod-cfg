@@ -1,9 +1,9 @@
 variable "s3_bucket_regional_domain" { type = string }
-variable "s3_bucket_id"             { type = string }
-variable "frontend_domain"          { type = string }
-variable "api_domain"               { type = string }
-variable "media_domain"             { type = string }
-variable "environment"              { type = string }
+variable "s3_bucket_id" { type = string }
+variable "frontend_domain" { type = string }
+variable "api_domain" { type = string }
+variable "media_domain" { type = string }
+variable "environment" { type = string }
 
 variable "alb_dns_name" {
   type        = string
