@@ -4,10 +4,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $.Release.Name }}-{{ $name }}-preview-svc
+  name: {{ $name }}-preview
   namespace: {{ $.Release.Namespace }}
   labels:
-    app: {{ $.Release.Name }}-{{ $name }}
+    app: {{ $name }}
     role: preview
 spec:
   type: {{ $svc.serviceType | default "ClusterIP" }}
@@ -17,6 +17,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ $.Release.Name }}-{{ $name }}
+    app: {{ $name }}
 {{- end }}
 {{- end }}
+

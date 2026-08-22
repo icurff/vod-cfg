@@ -12,8 +12,9 @@ on:
           - frontend
           - transcode-worker
       tag:
-        description: 'Image tag / Git commit SHA'
+        description: 'Semantic Version tag (e.g. 1.0.9, 1.0.0)'
         required: true
+        default: '1.0.0'
         type: string
       environment:
         description: 'Target environment'
@@ -49,7 +50,7 @@ jobs:
         run: |
           SERVICE="${{ github.event.client_payload.service || github.event.inputs.service }}"
           TAG="${{ github.event.client_payload.tag || github.event.inputs.tag }}"
-          ENV="${{ github.event.client_payload.environment || github.event.inputs.environment || 'develop' }}"
+          ENV="${{ github.event.client_payload.environment || github.event.inputs.environment || 'dev' }}"
           
           echo "Updating service '$SERVICE' with image tag '$TAG' for env '$ENV'..."
           

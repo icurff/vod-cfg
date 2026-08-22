@@ -16,8 +16,14 @@ resource "aws_iam_role" "backend" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${local.oidc_provider_id}:sub" = "system:serviceaccount:streamforge-${var.environment}:vod-be-sa"
           "${local.oidc_provider_id}:aud" = "sts.amazonaws.com"
+        }
+        StringLike = {
+          "${local.oidc_provider_id}:sub" = [
+            "system:serviceaccount:streamforge-${var.environment}:backend-sa",
+            "system:serviceaccount:streamforge-${var.environment}:vod-be-sa",
+            "system:serviceaccount:streamforge-${var.environment}:backend"
+          ]
         }
       }
     }]
@@ -83,7 +89,9 @@ resource "aws_iam_role" "worker" {
           }
           StringLike = {
             "${local.oidc_provider_id}:sub" = [
+              "system:serviceaccount:streamforge-${var.environment}:worker-sa",
               "system:serviceaccount:streamforge-${var.environment}:transcode-worker-sa",
+              "system:serviceaccount:streamforge-${var.environment}:worker",
               "system:serviceaccount:keda:keda-operator"
             ]
           }

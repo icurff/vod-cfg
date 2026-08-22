@@ -17,11 +17,11 @@ services:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-backend
       pullPolicy: Always
-      tag: "437e525086becac08788d43dd383e62aedbd2fff" # backend-tag
+      tag: "1.0.0" # backend-tag
     port: 8080
     serviceAccount:
       create: true
-      name: vod-be-sa
+      name: backend-sa
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-backend-irsa-dev"
     blueGreen:
@@ -76,7 +76,7 @@ services:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-frontend
       pullPolicy: Always
-      tag: "0508948b9e0b104c041d80eac0e8719c6546cc93" # frontend-tag
+      tag: "1.0.0" # frontend-tag
     port: 80
     blueGreen:
       autoPromotionEnabled: true
@@ -114,10 +114,10 @@ services:
     image:
       repository: 393698973321.dkr.ecr.ap-southeast-1.amazonaws.com/streamforge-worker
       pullPolicy: Always
-      tag: "c2b7a24d10a985c54bf8461416d98c709bd6ae46" # worker-tag
+      tag: "1.0.0" # worker-tag
     serviceAccount:
       create: true
-      name: transcode-worker-sa
+      name: worker-sa
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::393698973321:role/streamforge-worker-irsa-dev"
     # Schedule on EKS Spot nodes

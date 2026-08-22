@@ -1,15 +1,15 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: streamforge-dev-transcode-worker-scaler
+  name: transcode-worker-scaler
   namespace: streamforge-dev
   labels:
-    app: streamforge-dev-transcode-worker
+    app: transcode-worker
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: streamforge-dev-transcode-worker
+    name: transcode-worker
   minReplicaCount: 0
   maxReplicaCount: 2
   cooldownPeriod: 300
@@ -22,4 +22,4 @@ spec:
         awsRegion: "ap-southeast-1"
         scaleOnInFlight: "true"
       authenticationRef:
-        name: streamforge-dev-transcode-worker-auth
+        name: transcode-worker-auth

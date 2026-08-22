@@ -4,26 +4,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: {{ $.Release.Name }}-{{ $name }}
+  name: {{ $name }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    app: {{ $.Release.Name }}-{{ $name }}
+    app: {{ $name }}
 spec:
   replicas: {{ $svc.replicaCount | default 1 }}
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: {{ $.Release.Name }}-{{ $name }}
+      app: {{ $name }}
   strategy:
     blueGreen:
-      activeService: {{ $.Release.Name }}-{{ $name }}-svc
-      previewService: {{ $.Release.Name }}-{{ $name }}-preview-svc
+      activeService: {{ $name }}
+      previewService: {{ $name }}-preview
       autoPromotionEnabled: {{ if hasKey $svc.blueGreen "autoPromotionEnabled" }}{{ $svc.blueGreen.autoPromotionEnabled }}{{ else }}false{{ end }}
       scaleDownDelaySeconds: {{ $svc.blueGreen.scaleDownDelaySeconds | default 30 }}
   template:
     metadata:
       labels:
-        app: {{ $.Release.Name }}-{{ $name }}
+        app: {{ $name }}
     spec:
       {{- if and $svc.serviceAccount $svc.serviceAccount.name }}
       serviceAccountName: {{ $svc.serviceAccount.name }}
@@ -48,11 +48,11 @@ spec:
           envFrom:
             {{- if $svc.configMap }}
             - configMapRef:
-                name: {{ $.Release.Name }}-{{ $name }}-config
+                name: {{ $name }}-config
             {{- end }}
             {{- if $svc.secrets }}
             - secretRef:
-                name: {{ $.Release.Name }}-{{ $name }}-secret
+                name: {{ $name }}-secret
             {{- end }}
           {{- end }}
           {{- if $svc.resources }}

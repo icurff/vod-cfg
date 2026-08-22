@@ -3,10 +3,10 @@
 apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.keda.targetService }}-auth
+  name: {{ .Values.keda.targetService }}-auth
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}-{{ .Values.keda.targetService }}
+    app: {{ .Values.keda.targetService }}
 spec:
   podIdentity:
     provider: aws
@@ -14,15 +14,15 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.keda.targetService }}-scaler
+  name: {{ .Values.keda.targetService }}-scaler
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}-{{ .Values.keda.targetService }}
+    app: {{ .Values.keda.targetService }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}-{{ .Values.keda.targetService }}
+    name: {{ .Values.keda.targetService }}
   minReplicaCount: {{ .Values.keda.minReplicas | default 0 }}
   maxReplicaCount: {{ .Values.keda.maxReplicas | default 10 }}
   cooldownPeriod: {{ .Values.keda.cooldownPeriod | default 300 }}
@@ -34,5 +34,6 @@ spec:
         queueLength: {{ .Values.keda.triggers.sqs.queueLength | default "1" | quote }}
         awsRegion: {{ .Values.keda.triggers.sqs.awsRegion | default "ap-southeast-1" | quote }}
       authenticationRef:
-        name: {{ .Release.Name }}-{{ .Values.keda.targetService }}-auth
+        name: {{ .Values.keda.targetService }}-auth
 {{- end }}
+
